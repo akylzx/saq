@@ -1,0 +1,87 @@
+.section {
+  padding-block: var(--sp-6) var(--sp-7);
+}
+
+.card {
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 10px;
+  padding: clamp(2.5rem, 1rem + 6vw, 5.5rem) var(--gutter);
+  text-align: center;
+}
+
+/* Faint heat glow bleeding up from the base — the signal, even here. */
+.card::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -60%;
+  width: 120%;
+  height: 120%;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(224, 83, 63, 0.22),
+    rgba(155, 47, 142, 0.08) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.eyebrow {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: var(--fs-eyebrow);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--heat-4);
+}
+
+.title {
+  position: relative;
+  margin-top: var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+}
+.em {
+  font-style: italic;
+  color: rgba(244, 243, 239, 0.78);
+}
+
+.lead {
+  position: relative;
+  margin: var(--sp-3) auto 0;
+  max-width: 46ch;
+  font-family: var(--font-serif);
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  color: rgba(244, 243, 239, 0.72);
+}
+
+.actions {
+  position: relative;
+  margin-top: var(--sp-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  justify-content: center;
+}
+
+/* Invert buttons for the dark card. */
+.card .primary {
+  background: var(--paper);
+  color: var(--ink);
+}
+.card .primary:hover {
+  background: #fff;
+}
+.card .secondary {
+  color: var(--paper);
+  border-color: rgba(244, 243, 239, 0.4);
+}
+.card .secondary:hover {
+  border-color: var(--paper);
+  background: rgba(244, 243, 239, 0.08);
+}

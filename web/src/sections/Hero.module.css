@@ -1,0 +1,93 @@
+.hero {
+  padding-top: clamp(2.5rem, 1rem + 6vw, 5.5rem);
+  padding-bottom: var(--sp-6);
+}
+
+.shell {
+  padding-top: var(--sp-4);
+  padding-bottom: var(--sp-5);
+}
+
+.eyebrow {
+  margin-bottom: var(--sp-3);
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: 400;
+  max-width: 14ch;
+}
+
+.line {
+  display: block;
+}
+
+.accent {
+  display: block;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.body {
+  margin-top: var(--sp-4);
+  max-width: 52ch;
+}
+
+.lead {
+  font-family: var(--font-serif);
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.actions {
+  margin-top: var(--sp-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.trust {
+  margin-top: var(--sp-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+}
+
+/* Instrument stage: analyzer centred, monospace annotations flanking it. */
+.stage {
+  margin-top: var(--sp-6);
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 2.2fr) 1fr;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.note {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.7;
+  color: var(--ink-3);
+  white-space: pre-wrap;
+}
+
+.noteLeft {
+  text-align: left;
+}
+.noteRight {
+  text-align: right;
+  color: var(--signal-ink);
+}
+
+@media (max-width: 900px) {
+  .stage {
+    grid-template-columns: 1fr;
+  }
+  .note {
+    display: none;
+  }
+}

@@ -1,0 +1,18 @@
+.head {
+  max-width: 44ch;
+  margin-bottom: var(--sp-5);
+}
+
+.title {
+  margin-top: var(--sp-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+}
+
+.lead {
+  margin-top: var(--sp-3);
+  font-family: var(--font-serif);
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  color: var(--ink-2);
+}

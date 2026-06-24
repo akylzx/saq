@@ -1,0 +1,67 @@
+/*
+ * saq design tokens
+ * ------------------
+ * Editorial ink-on-paper. The page chrome is strictly monochrome; the only
+ * chromatic color belongs to the spectrogram heatmap and the verdict states,
+ * because that is where the signal actually lives.
+ */
+:root {
+  /* Paper & ink — cool bone, warm-neutral black (not the warm-cream default) */
+  --paper: #f4f3ef;
+  --paper-sunk: #eceae3; /* recessed panels */
+  --paper-raise: #fbfaf7; /* lifted cards */
+  --ink: #161514;
+  --ink-2: #57534c; /* secondary text */
+  --ink-3: #8a857c; /* faint meta / captions */
+  --rule: #dcd8cf; /* hairline */
+  --rule-strong: #c7c2b6; /* emphasised hairline */
+
+  /* Signal — used only where it carries meaning */
+  --signal: #ce3b23; /* spoof / synthetic / alert */
+  --signal-ink: #9c2e1c;
+  --safe: #3c7a55; /* bona fide / genuine */
+  --safe-ink: #2c5c40;
+
+  /* Spectrogram heat ramp (cold → hot) — lives inside the analyzer only */
+  --heat-0: #1b1d3a;
+  --heat-1: #45327e;
+  --heat-2: #9b2f8e;
+  --heat-3: #e0533f;
+  --heat-4: #f4b53f;
+
+  /* Type roles */
+  --font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --font-serif: "Newsreader", Georgia, serif; /* long-form editorial body */
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Fluid type scale */
+  --fs-display: clamp(2.85rem, 1.4rem + 6.2vw, 6.25rem);
+  --fs-h2: clamp(1.9rem, 1.1rem + 3.2vw, 3rem);
+  --fs-h3: clamp(1.25rem, 1.05rem + 0.9vw, 1.6rem);
+  --fs-lead: clamp(1.1rem, 1rem + 0.5vw, 1.4rem);
+  --fs-body: 1.0625rem;
+  --fs-sm: 0.9375rem;
+  --fs-mono: 0.8125rem;
+  --fs-eyebrow: 0.78rem;
+
+  /* Spacing scale (8px base) */
+  --sp-1: 0.5rem;
+  --sp-2: 1rem;
+  --sp-3: 1.5rem;
+  --sp-4: 2rem;
+  --sp-5: 3rem;
+  --sp-6: 4.5rem;
+  --sp-7: 7rem;
+  --sp-8: 10rem;
+
+  /* Structure */
+  --maxw: 1180px;
+  --gutter: clamp(1.25rem, 0.5rem + 3vw, 4rem);
+  --radius: 4px;
+  --radius-pill: 100px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur: 0.55s;
+}
