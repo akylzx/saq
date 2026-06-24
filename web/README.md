@@ -33,6 +33,32 @@ npm run build        # type-check + production bundle → dist/
 npm run preview      # serve the built bundle
 ```
 
+## Speech-analysis pipeline (the "Analyze" section)
+
+The `#try` section runs a full pipeline entirely client-side:
+
+1. **Capture** — file upload or mic recording (`useRecorder`). Everything is decoded once,
+   resampled to 16 kHz mono, and re-encoded to WAV (`lib/audio.ts`) so the same signal feeds
+   both the transcriber and the backend detector.
+2. **Speech-to-text** — Whisper (`Xenova/whisper-base`) runs in a **Web Worker** via
+   `@huggingface/transformers` (`lib/stt.worker.ts` / `lib/stt.ts`). Returns transcript,
+   detected language (script heuristic), an estimated confidence, and segment timestamps. The
+   model downloads once (~tens of MB, quantized) and then runs on-device — nothing is uploaded.
+3. **AI voice detection** — the original audio (as WAV) is sent to the existing
+   `POST /api/v1/detect`. No backend changes.
+4. **Combined analysis** — `lib/analyze.ts` fuses the detector (primary signal) with transcript
+   quality, language, and speech presence (supporting signals) into a final assessment:
+   **Likely human / Likely AI-generated / Inconclusive**, with a plain explanation and the key
+   factors. It deliberately does not rely on the detector alone.
+
+STT and detection run in parallel and degrade independently: if the backend is offline you still
+get the transcript (verdict becomes *Inconclusive*); if STT fails you still get the voice verdict.
+
+### Preview the result states without the model/backend
+
+Append `?mock=<mode>` and upload any file to see canned results:
+`?mock=ai`, `?mock=human`, `?mock=inconclusive`, `?mock=offline`.
+
 ## Design notes
 
 Editorial ink-on-paper system inspired by the reference designs. The page chrome is intentionally
