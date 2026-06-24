@@ -61,15 +61,3 @@ export async function detect(file: File, signal?: AbortSignal): Promise<DetectDa
   }
   return envelope.data;
 }
-
-/** Check whether the backend is up and the model is loaded. */
-export async function health(signal?: AbortSignal): Promise<boolean> {
-  try {
-    const res = await fetch("/api/v1/health", { signal });
-    if (!res.ok) return false;
-    const body = (await res.json()) as { status?: string };
-    return body.status === "ok";
-  } catch {
-    return false;
-  }
-}
