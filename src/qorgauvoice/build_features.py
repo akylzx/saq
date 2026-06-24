@@ -17,7 +17,7 @@ import numpy as np
 
 from qorgauvoice.config import load_config
 from qorgauvoice.config.seeding import seed_everything
-from qorgauvoice.data.augment.pipeline import degrade, rng_for
+from qorgauvoice.data.augment.pipeline import degrade, rng_for, room_playback
 from qorgauvoice.data.manifest import Manifest
 from qorgauvoice.features.backbone import Wav2Vec2Extractor
 from qorgauvoice.features.extract import embed_manifest
@@ -55,6 +55,13 @@ def main() -> None:
         log.info("Embedding %d clips (degraded: telephone+noise) ...", len(df))
         X_deg, _ = embed_manifest(df, extractor, config, transform=deg)
         arrays["X_deg"] = X_deg.astype(np.float32)
+
+        def room(clip):  # independent RNG stream from `deg` (different source_id salt)
+            return room_playback(clip, rng_for(clip.source_id + ":room", seed), config)
+
+        log.info("Embedding %d clips (room: played-back / re-recorded) ...", len(df))
+        X_room, _ = embed_manifest(df, extractor, config, transform=room)
+        arrays["X_room"] = X_room.astype(np.float32)
 
     out = artifacts / "features.npz"
     np.savez(out, **arrays)

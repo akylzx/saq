@@ -28,8 +28,9 @@ class DataConfig(_Frozen):
 
 
 class SynthConfig(_Frozen):
-    engines: tuple[str, ...] = ("mms", "silero")  # D14
-    unseen_engine: str = "silero"  # held out for test_unseen (D19)
+    # Seen (training) engines — diverse families so the model learns engine-invariant cues (D71).
+    engines: tuple[str, ...] = ("mms", "apple", "edge", "gtts")
+    unseen_engine: str = "silero"  # held out entirely for test_unseen (D19)
     mms_kaz_model: str = "facebook/mms-tts-kaz"
     mms_rus_model: str = "facebook/mms-tts-rus"
 
@@ -40,6 +41,13 @@ class AugmentConfig(_Frozen):
     telephone_sr: int = 8000
     noise_snr_db: float = 15.0  # additive white noise level
     reverb_prob: float = 0.3  # chance of adding synthetic reverb in `degrade`
+    # Room "played-back / re-recorded" channel (D70 — breaks the channel shortcut).
+    room_band_low: float = 150.0  # speaker/mic band-pass low (Hz)
+    room_band_high: float = 7000.0  # < Nyquist (8 kHz at 16 kHz sr)
+    room_rt60_min: float = 0.2  # reverb time range (s)
+    room_rt60_max: float = 0.7
+    room_snr_min: float = 10.0  # ambient mic-noise SNR range (dB)
+    room_snr_max: float = 25.0
 
 
 class BackboneConfig(_Frozen):
@@ -58,6 +66,7 @@ class ClassifierConfig(_Frozen):
             "num_leaves": 31,
             "subsample": 0.8,
             "colsample_bytree": 0.8,
+            "class_weight": "balanced",  # multi-engine spoof set is imbalanced vs bona fide
         }
     )
     mlp_params: dict = Field(

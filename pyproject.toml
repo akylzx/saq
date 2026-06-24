@@ -26,6 +26,8 @@ dependencies = [
     "pydantic-settings",
     "omegaconf",
     "num2words",
+    "gtts",
+    "edge-tts",
 ]
 
 [project.optional-dependencies]

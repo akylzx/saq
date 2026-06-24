@@ -62,7 +62,8 @@ curl -F "audio=@clip.wav" http://127.0.0.1:8000/api/v1/detect
 
 ## 0. Build Status — updated 2026-06-24
 
-**Phases complete: P0–P4.** Pipeline runs end-to-end; full unit suite green (29 tests).
+**Status:** P0–P5 + backend API done; the channel-shortcut + engine-diversity robustness fix has
+landed. Full unit suite green (38 tests).
 
 ### Done
 - **P0 Scaffold** — `uv` / Python 3.11, frozen `AppConfig`, `contracts.py`, seeding, lazy XLS-R
@@ -91,17 +92,27 @@ curl -F "audio=@clip.wav" http://127.0.0.1:8000/api/v1/detect
   distribution boundary for a **separate web frontend** (teammate's repo) — the OpenAPI contract
   at `/docs` is the interface. Bilingual labels/reasons moved to shared `explain/reasons.py`.
   Run: `uv run uvicorn qorgauvoice.api.server:app` → http://127.0.0.1:8000/docs
+- **Channel + engine robustness fix (D70, D71)** — root cause of the real-world failure was a
+  *channel shortcut* ("clean digital = synthetic, room/mic-recorded = human"), confirmed
+  empirically. Fix = (D70) **room "played-back / re-recorded" augmentation** (`data/augment/room.py`:
+  speaker/mic band-pass + randomized RIR + ambient noise) applied to BOTH classes so channel can't
+  predict the label; **(D71) engine diversity** — training spoof now spans **MMS + Apple-say +
+  edge-tts + gTTS** (kk+ru), with **Silero held out entirely** as the unseen-engine probe. Train on
+  `clean ∪ telephone ∪ room`; 2×3 eval; LightGBM `class_weight=balanced`.
 
-### Current snapshot — scaled to 820 clips (FLEURS `validation`, 200/lang)
-Splits: train 712 · `test_same` 88 (MMS) · `test_unseen` 64 (Silero + held-out real).
-**EER 0.000 / AUC 1.000 on BOTH seen (MMS) and unseen (Silero) TTS, clean AND degraded.**
-The perfect separation **held at 10× scale**, so quantity is no longer the limiter.
-**Remaining caveat — task difficulty, not size:** FLEURS (clean read human speech) vs. MMS/Silero
-(neural TTS) is a large, linearly-separable acoustic gap; the model likely detects "TTS-generated"
-broadly, not sophisticated voice-cloning artifacts. To stress it, the next data work needs
-*harder* spoofs (XTTS/ElevenLabs-class voice cloning) and *more diverse* bona fide (telephone /
-spontaneous), not more FLEURS. Threshold calibration is still unstable on perfectly-separable data
-(flips between extremes); it will normalise once classes overlap.
+### Current snapshot — multi-engine + channel-robust (1096 clips)
+Train spoof engines: MMS · Apple · edge · gTTS (kk+ru). **Silero held out** (unseen). Channels:
+clean / telephone / room. **2×3 EER:** `test_same` {clean 0.000, telephone 0.027, room 0.037};
+**`test_unseen` (held-out Silero) {clean 0.000, telephone 0.000, room 0.048 / AUC 0.998}**.
+Diagnostic on real clips: held-out Silero + room → spoof 1.000; Silero + an *unseen* reverb →
+spoof 0.999; **gTTS (Google) + room → spoof 1.000** (the original reported failure, fixed); real
+human + room → bona_fide. The channel shortcut is gone; generalization holds to unseen engines
+AND unseen channels.
+**Remaining gaps (honest):** (1) all engines are *text-to-speech* — true **voice cloning**
+(XTTS/ElevenLabs), the real vishing threat, is untested and the top next add; (2) validation uses
+*simulated* room channels — a **real play-and-record** sample is the gold-standard check; (3)
+modest test data (132 `test_same`, 45 `test_unseen`); (4) threshold still degenerate → demo/API use
+a 0.5 fallback. **The trained model artifact changed — re-commit `artifacts/models/` to share it.**
 
 ### Run commands
 - Build data: `uv run python -m qorgauvoice.data.build_dataset --per-language N`
@@ -111,10 +122,14 @@ spontaneous), not more FLEURS. Threshold calibration is still unstable on perfec
 - Env: set `HF_HUB_DISABLE_XET=1` (faster/stable HF downloads) and `PYTORCH_ENABLE_MPS_FALLBACK=1`.
 
 ### What's left
-1. **Make the metric credible (do FIRST).** Scale `--per-language` to hundreds on the `train`
-   split; add more/harder TTS engines; fix threshold calibration (degenerate on toy data); expect
-   EER to rise off 0 — that's the point. Add a **Kazakh** unseen-TTS engine (Silero is RU-only, so
-   `test_unseen` is currently RU-dominant — D69).
+1. **Voice cloning (top priority for real quality).** Add XTTS/OpenVoice-class *cloning* spoofs
+   (impersonating a specific speaker) — the actual vishing threat; current engines are all TTS.
+   Hold one out to measure generalization to cloning.
+2. **Real play-and-record validation.** Collect a few clips of TTS played through speakers and
+   recorded via mic (real RIR/mic, not simulated) as a held-out eval — the gold-standard check.
+3. **Threshold calibration** — still degenerate on near-separable data; revisit once cloning makes
+   scores overlap.
+4. Scale data; add a **Kazakh** held-out engine (Silero is RU-only, so `test_unseen` is RU).
 2. **P6 — Explainability** (§8/D25–D30): temporal heatmap, acoustic indicators, bilingual
    (kk/ru/en) reasons, SHAP — wire into the existing demo (the spectrogram panel is already there).
 3. **P7 — STRETCH** (D8/D9): MLP head; SSL-AASIST as a separate `EndToEndClassifier`.
@@ -696,6 +711,10 @@ cache) is resolved in §23.1.
   download** (`refs/convert/parquet`, default `validation` split) because the dataset *builder*
   hangs in this env · **D69** Silero synth at 24 kHz then resample to 16 kHz, and Silero is
   RU-only (Kazakh unseen-TTS is an open gap).
+- **D70–D71** Robustness fix — **D70** room "played-back/re-recorded" augmentation (band-pass +
+  randomized RIR + ambient noise), applied to both classes, to kill the channel shortcut ·
+  **D71** engine diversity (MMS + Apple-say + edge-tts + gTTS seen; Silero held out) so the model
+  learns engine-invariant synthetic cues that survive the room channel.
 
 ---
 

@@ -36,14 +36,19 @@ def main() -> None:
     data = np.load(features_path, allow_pickle=False)
     X, y, split = data["X"], data["y"], data["split"]
     X_deg = data["X_deg"] if "X_deg" in data.files else None
+    X_room = data["X_room"] if "X_room" in data.files else None
 
     train_mask = split == "train"
-    # D15: train on clean ∪ degraded so the model is codec/noise-robust (off the channel shortcut)
-    if X_deg is not None:
-        X_train = np.vstack([X[train_mask], X_deg[train_mask]])
-        y_train = np.concatenate([y[train_mask], y[train_mask]])
-    else:
-        X_train, y_train = X[train_mask], y[train_mask]
+    # D15/D70: train on clean ∪ telephone ∪ room (both classes) so neither codec nor the
+    # room/re-record channel can be used as a proxy for the label (kills the channel shortcut).
+    X_parts = [X[train_mask]]
+    y_parts = [y[train_mask]]
+    for extra in (X_deg, X_room):
+        if extra is not None:
+            X_parts.append(extra[train_mask])
+            y_parts.append(y[train_mask])
+    X_train = np.vstack(X_parts)
+    y_train = np.concatenate(y_parts)
 
     classifier = build_classifier(config).fit(X_train, y_train)
     threshold = threshold_at_fpr(
@@ -59,7 +64,9 @@ def main() -> None:
 
     conditions: dict[str, np.ndarray] = {"clean": X}
     if X_deg is not None:
-        conditions["degraded"] = X_deg
+        conditions["telephone"] = X_deg
+    if X_room is not None:
+        conditions["room"] = X_room
 
     # The held-out real clips live in `test_same`; reuse them as the bona fide negatives
     # for the unseen-TTS evaluation (whose rows are unseen-engine spoofs only).
