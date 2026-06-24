@@ -10,7 +10,12 @@ import { pipeline, env } from "@huggingface/transformers";
 // Fetch weights from the HF hub (no bundled local models).
 env.allowLocalModels = false;
 
-const MODEL = "Xenova/whisper-base"; // multilingual; quantized weights keep the download modest
+// Multilingual Whisper — auto-detects and transcribes in the spoken language (kk / ru / en + more).
+// `small` is markedly better than `base` at low-resource Kazakh & Russian; `q8` keeps the
+// one-time browser download reasonable (~250 MB, cached). Revert to "Xenova/whisper-base" for a
+// lighter download if Kazakh quality is acceptable.
+const MODEL = "Xenova/whisper-small";
+const MODEL_DTYPE = "q8";
 
 type InMsg = {
   type: "transcribe";
@@ -30,7 +35,7 @@ type Transcriber = (
 type PipelineFactory = (
   task: "automatic-speech-recognition",
   model: string,
-  options?: { progress_callback?: (p: unknown) => void },
+  options?: { dtype?: string; progress_callback?: (p: unknown) => void },
 ) => Promise<Transcriber>;
 const createPipeline = pipeline as unknown as PipelineFactory;
 
@@ -39,6 +44,7 @@ let pipePromise: Promise<Transcriber> | null = null;
 function getPipeline(id: number): Promise<Transcriber> {
   if (!pipePromise) {
     pipePromise = createPipeline("automatic-speech-recognition", MODEL, {
+      dtype: MODEL_DTYPE,
       progress_callback: (p: unknown) => {
         const e = p as { status?: string; file?: string; progress?: number };
         if (e.status === "progress") {
