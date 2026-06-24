@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from qorgauvoice.eval.metrics import compute_eer, evaluate, threshold_at_fpr
+from saq.eval.metrics import compute_eer, evaluate, threshold_at_fpr
 
 
 def test_perfect_separation_eer_zero():

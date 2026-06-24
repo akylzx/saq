@@ -11,7 +11,7 @@ import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
 
-from qorgauvoice.contracts import AudioClip
+from saq.contracts import AudioClip
 
 
 def mel_spectrogram_figure(clip: AudioClip, n_mels: int = 80):

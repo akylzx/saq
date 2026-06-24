@@ -8,7 +8,7 @@ from typing import Sequence
 
 import numpy as np
 
-from qorgauvoice.contracts import AudioClip, FloatArray
+from saq.contracts import AudioClip, FloatArray
 
 
 class FakeEmbeddingExtractor:

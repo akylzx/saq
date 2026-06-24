@@ -45,7 +45,7 @@ export async function detect(file: File, signal?: AbortSignal): Promise<DetectDa
     });
   } catch {
     throw new DetectError(
-      "Couldn't reach the saq backend. Start it with `uv run uvicorn qorgauvoice.api.server:app` and try again.",
+      "Couldn't reach the saq backend. Start it with `uv run uvicorn saq.api.server:app` and try again.",
     );
   }
 

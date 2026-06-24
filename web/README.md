@@ -17,8 +17,8 @@ The live "Try saq" section calls the backend at `POST /api/v1/detect`. The dev s
 
 ```bash
 # from the repo root
-uv run uvicorn qorgauvoice.api.server:app            # real model
-QV_MOCK=1 uv run uvicorn qorgauvoice.api.server:app  # instant fake verdicts, same contract
+uv run uvicorn saq.api.server:app            # real model
+QV_MOCK=1 uv run uvicorn saq.api.server:app  # instant fake verdicts, same contract
 ```
 
 If the backend isn't running, the demo degrades gracefully and shows how to start it — the rest

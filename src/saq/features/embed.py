@@ -7,7 +7,7 @@ import hashlib
 
 import numpy as np
 
-from qorgauvoice.contracts import AudioClip
+from saq.contracts import AudioClip
 
 
 def _normalized_bytes(clip: AudioClip) -> bytes:

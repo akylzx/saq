@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 
-from qorgauvoice.contracts import FloatArray, IntArray
+from saq.contracts import FloatArray, IntArray
 
 
 class LgbmClassifier:

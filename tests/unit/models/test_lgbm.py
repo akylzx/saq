@@ -2,10 +2,10 @@
 
 import numpy as np
 
-from qorgauvoice.eval.metrics import evaluate
-from qorgauvoice.models.lgbm import LgbmClassifier
-from qorgauvoice.testing import FakeEmbeddingExtractor
-from qorgauvoice.contracts import AudioClip
+from saq.eval.metrics import evaluate
+from saq.models.lgbm import LgbmClassifier
+from saq.testing import FakeEmbeddingExtractor
+from saq.contracts import AudioClip
 
 
 def _separable_dataset(n=120, dim=32, seed=0):

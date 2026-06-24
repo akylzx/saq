@@ -2,9 +2,9 @@
 
 import numpy as np
 
-from qorgauvoice.config import load_config
-from qorgauvoice.contracts import AudioClip
-from qorgauvoice.features.backbone import Wav2Vec2Extractor
+from saq.config import load_config
+from saq.contracts import AudioClip
+from saq.features.backbone import Wav2Vec2Extractor
 
 
 def test_embed_one_clip_returns_dim_vector():

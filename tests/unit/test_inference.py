@@ -2,9 +2,9 @@
 
 import numpy as np
 
-from qorgauvoice.contracts import AudioClip
-from qorgauvoice.inference import Detector, Verdict
-from qorgauvoice.testing import FakeEmbeddingExtractor
+from saq.contracts import AudioClip
+from saq.inference import Detector, Verdict
+from saq.testing import FakeEmbeddingExtractor
 
 
 class _StubClassifier:

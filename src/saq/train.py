@@ -5,7 +5,7 @@ EER/AUC/accuracy per split, and saves the model + calibrator (non-pickle, D52).
 IMPORTANT: this process must NOT import torch (OpenMP clash with LightGBM → segfault on
 macOS). Run feature extraction separately via `build_features.py` first.
 
-Run: `uv run python -m qorgauvoice.build_features && uv run python -m qorgauvoice.train`
+Run: `uv run python -m saq.build_features && uv run python -m saq.train`
 """
 
 from __future__ import annotations
@@ -16,9 +16,9 @@ from pathlib import Path
 
 import numpy as np
 
-from qorgauvoice.config import load_config
-from qorgauvoice.eval.metrics import evaluate, threshold_at_fpr
-from qorgauvoice.models.registry import build_classifier
+from saq.config import load_config
+from saq.eval.metrics import evaluate, threshold_at_fpr
+from saq.models.registry import build_classifier
 
 log = logging.getLogger("train")
 
@@ -31,7 +31,7 @@ def main() -> None:
     features_path = artifacts / "features.npz"
     if not features_path.exists():
         raise FileNotFoundError(
-            f"{features_path} not found — run `python -m qorgauvoice.build_features` first."
+            f"{features_path} not found — run `python -m saq.build_features` first."
         )
     data = np.load(features_path, allow_pickle=False)
     X, y, split = data["X"], data["y"], data["split"]

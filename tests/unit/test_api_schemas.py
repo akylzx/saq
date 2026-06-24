@@ -1,7 +1,7 @@
 """D63 — API contract envelope (fast, no model)."""
 
-from qorgauvoice.api.schemas import DetectData, DetectResponse, Reason
-from qorgauvoice.explain.reasons import verdict_label, verdict_reason
+from saq.api.schemas import DetectData, DetectResponse, Reason
+from saq.explain.reasons import verdict_label, verdict_reason
 
 
 def test_detect_response_envelope_shape():

@@ -11,10 +11,10 @@ from typing import Callable
 import numpy as np
 import pandas as pd
 
-from qorgauvoice.config.app import AppConfig
-from qorgauvoice.contracts import AudioClip, EmbeddingExtractor
-from qorgauvoice.data.audio_io import load_validated_file
-from qorgauvoice.features.embed import cache_key
+from saq.config.app import AppConfig
+from saq.contracts import AudioClip, EmbeddingExtractor
+from saq.data.audio_io import load_validated_file
+from saq.features.embed import cache_key
 
 Transform = Callable[[AudioClip], AudioClip]
 

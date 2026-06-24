@@ -1,10 +1,10 @@
-"""QorgauVoice HTTP API (FastAPI). Thin JSON layer over the Detector for the web frontend.
+"""saq HTTP API (FastAPI). Thin JSON layer over the Detector for the web frontend.
 
 Composition root (D38): sets process env + loads the model once at startup. Single-process
 inference (torch + LightGBM predict) is safe with the OpenMP guards (D66); requests are
 serialized with a lock because the model isn't thread-safe and MPS is a single device.
 
-Run: `uv run uvicorn qorgauvoice.api.server:app`  (or `python -m qorgauvoice.api.server`)
+Run: `uv run uvicorn saq.api.server:app`  (or `python -m saq.api.server`)
 Docs: http://127.0.0.1:8000/docs
 """
 
@@ -33,12 +33,12 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from qorgauvoice.api.schemas import DetectData, DetectResponse, HealthResponse, Reason
-from qorgauvoice.config import load_config
-from qorgauvoice.data.audio_io import AudioValidationError, load_validated_bytes
-from qorgauvoice.explain.reasons import verdict_reason
-from qorgauvoice.explain.visualize import mel_spectrogram_figure
-from qorgauvoice.inference import Detector, load_detector
+from saq.api.schemas import DetectData, DetectResponse, HealthResponse, Reason
+from saq.config import load_config
+from saq.data.audio_io import AudioValidationError, load_validated_bytes
+from saq.explain.reasons import verdict_reason
+from saq.explain.visualize import mel_spectrogram_figure
+from saq.inference import Detector, load_detector
 
 log = logging.getLogger("api")
 
@@ -53,7 +53,7 @@ async def lifespan(app: FastAPI):
     # QV_MOCK=1 → run the real contract with fake verdicts and NO model download (frontend dev).
     if os.environ.get("QV_MOCK"):
         _STATE["mock"] = True
-        log.info("QorgauVoice API ready (MOCK mode — no model loaded).")
+        log.info("saq API ready (MOCK mode — no model loaded).")
         yield
         return
     detector = load_detector(config)
@@ -63,7 +63,7 @@ async def lifespan(app: FastAPI):
     except Exception as exc:  # best-effort
         log.warning("Warmup skipped: %s", exc)
     _STATE["detector"] = detector
-    log.info("QorgauVoice API ready.")
+    log.info("saq API ready.")
     yield
 
 
@@ -116,7 +116,7 @@ def _run_inference(raw: bytes, filename: str, want_spectrogram: bool) -> DetectD
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="QorgauVoice API", version="1.0.0", lifespan=lifespan)
+    app = FastAPI(title="saq API", version="1.0.0", lifespan=lifespan)
     cfg = load_config()
     app.add_middleware(
         CORSMiddleware,

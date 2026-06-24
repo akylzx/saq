@@ -2,8 +2,8 @@
 
 import numpy as np
 
-from qorgauvoice.contracts import AudioClip
-from qorgauvoice.features.embed import cache_key
+from saq.contracts import AudioClip
+from saq.features.embed import cache_key
 
 _FP = "facebook/wav2vec2-xls-r-300m@main|pool=mean_std|layers=last|sr=16000"
 

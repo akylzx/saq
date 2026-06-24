@@ -1,11 +1,11 @@
-"""QorgauVoice demo (D31-D33). Upload or record audio → real/synthetic verdict + confidence
+"""saq demo (D31-D33). Upload or record audio → real/synthetic verdict + confidence
 + mel spectrogram, with a bilingual (kk/ru/en) plain-language line.
 
 Composition root (D38): the only place that wires concretes and sets process env. Runs as a
 SINGLE process (torch backbone + LightGBM predict) — safe because only `fit` triggers the
 OpenMP segfault, and we pin the duplicate-OpenMP guards below.
 
-Run: `uv run python -m qorgauvoice.demo.app`
+Run: `uv run python -m saq.demo.app`
 """
 
 from __future__ import annotations
@@ -23,10 +23,10 @@ from pathlib import Path
 import gradio as gr
 import numpy as np
 
-from qorgauvoice.config import load_config
-from qorgauvoice.data.audio_io import AudioValidationError, load_validated_array
-from qorgauvoice.explain.visualize import mel_spectrogram_figure
-from qorgauvoice.inference import Verdict, load_detector
+from saq.config import load_config
+from saq.data.audio_io import AudioValidationError, load_validated_array
+from saq.explain.visualize import mel_spectrogram_figure
+from saq.inference import Verdict, load_detector
 
 log = logging.getLogger("demo")
 
@@ -90,9 +90,9 @@ def build_app(config=None) -> gr.Blocks:
     examples_dir = Path(config.paths.examples_dir)
     example_files = sorted(str(p) for p in examples_dir.glob("*.wav"))
 
-    with gr.Blocks(title="QorgauVoice") as demo:
+    with gr.Blocks(title="saq") as demo:
         gr.Markdown(
-            "# 🛡️ QorgauVoice\n"
+            "# 🛡️ saq\n"
             "Bilingual (Kazakh/Russian) **AI-voice / deepfake detector**. "
             "Upload or record a clip to check whether the voice is genuine or synthetic."
         )

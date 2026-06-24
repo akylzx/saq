@@ -5,7 +5,7 @@ Kept SEPARATE from training: PyTorch and LightGBM each bundle their own OpenMP r
 and co-importing them in one process segfaults on macOS. This process imports torch but
 never LightGBM; `train.py` imports LightGBM but never torch.
 
-Run: `uv run python -m qorgauvoice.build_features`
+Run: `uv run python -m saq.build_features`
 """
 
 from __future__ import annotations
@@ -15,12 +15,12 @@ from pathlib import Path
 
 import numpy as np
 
-from qorgauvoice.config import load_config
-from qorgauvoice.config.seeding import seed_everything
-from qorgauvoice.data.augment.pipeline import degrade, rng_for, room_playback
-from qorgauvoice.data.manifest import Manifest
-from qorgauvoice.features.backbone import Wav2Vec2Extractor
-from qorgauvoice.features.extract import embed_manifest
+from saq.config import load_config
+from saq.config.seeding import seed_everything
+from saq.data.augment.pipeline import degrade, rng_for, room_playback
+from saq.data.manifest import Manifest
+from saq.features.backbone import Wav2Vec2Extractor
+from saq.features.extract import embed_manifest
 
 log = logging.getLogger("build_features")
 

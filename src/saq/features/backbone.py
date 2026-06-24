@@ -7,8 +7,8 @@ from typing import Sequence
 
 import numpy as np
 
-from qorgauvoice.config.app import AppConfig
-from qorgauvoice.contracts import AudioClip, FloatArray
+from saq.config.app import AppConfig
+from saq.contracts import AudioClip, FloatArray
 
 
 def device_for(prefer: str, allow_cpu_fallback: bool) -> str:

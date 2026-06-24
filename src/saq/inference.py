@@ -8,8 +8,8 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from qorgauvoice.config.app import AppConfig
-from qorgauvoice.contracts import AudioClip, Classifier, EmbeddingExtractor
+from saq.config.app import AppConfig
+from saq.contracts import AudioClip, Classifier, EmbeddingExtractor
 
 
 @dataclass(frozen=True)
@@ -36,8 +36,8 @@ class Detector:
 
 def load_detector(config: AppConfig) -> Detector:
     """Wire the real backbone + LightGBM model + calibrated threshold (composition root helper)."""
-    from qorgauvoice.features.backbone import Wav2Vec2Extractor
-    from qorgauvoice.models.lgbm import LgbmClassifier
+    from saq.features.backbone import Wav2Vec2Extractor
+    from saq.models.lgbm import LgbmClassifier
 
     artifacts = Path(config.paths.artifacts_dir)
     extractor = Wav2Vec2Extractor(config)

@@ -1,4 +1,4 @@
-# CLAUDE.md — QorgauVoice (Anti-Spoofing Core)
+# CLAUDE.md — saq (Anti-Spoofing Core)
 
 > **Purpose of this document.** This is the authoritative decision record and working
 > brief for an AI coding agent (and the architect agent that will plan from it). It
@@ -11,7 +11,7 @@
 
 ## Frontend Developer Guide — READ THIS FIRST if you're building the website
 
-**You are building the web frontend. The Python backend in `src/qorgauvoice/` is DONE and
+**You are building the web frontend. The Python backend in `src/saq/` is DONE and
 working — do NOT modify it, its tests, or `pyproject.toml`.** Build the site as a *separate app*
 in your own stack, in a new top-level `web/` directory (or a separate repo). The API contract
 below is the only interface you need, and it will **not change** when the backend model improves.
@@ -21,9 +21,9 @@ This keeps the two of us conflict-free: you touch `web/`, the backend owner touc
 ```bash
 uv sync                                              # one-time, installs Python deps
 # Real model (downloads ~1.2 GB SSL backbone on first request):
-uv run uvicorn qorgauvoice.api.server:app
+uv run uvicorn saq.api.server:app
 # OR — frontend dev mode: instant, NO model download, fake verdicts, identical contract:
-QV_MOCK=1 uv run uvicorn qorgauvoice.api.server:app
+QV_MOCK=1 uv run uvicorn saq.api.server:app
 ```
 Serves at `http://127.0.0.1:8000`. **Interactive contract + try-it-out: http://127.0.0.1:8000/docs.**
 Use `QV_MOCK=1` while building UI; switch to the real model when you want true detections.
@@ -53,7 +53,7 @@ curl -F "audio=@clip.wav" http://127.0.0.1:8000/api/v1/detect
 ### 3. Ground rules
 - All frontend code under `web/` (or a separate repo). Do **not** edit `src/`, `tests/`, `pyproject.toml`.
 - CORS: dev allows all origins. For a deployed site, ask the backend owner to set
-  `ApiConfig.cors_origins` in `src/qorgauvoice/config/app.py`.
+  `ApiConfig.cors_origins` in `src/saq/config/app.py`.
 - `label` is machine-readable; show `reason[lang]` (kk/ru/en) to users. **`confidence` can read
   ~100% even when wrong** (calibration is WIP, and the model is fooled by play-and-recorded audio) —
   present it as a hint, not a guarantee.
@@ -81,7 +81,7 @@ landed. Full unit suite green (38 tests).
   verdict + confidence + mel spectrogram; 3 canned offline examples; localhost-only (D53).
   **Single-process inference** (torch backbone + LightGBM `predict`) is safe — only `fit`
   triggers the OpenMP segfault — with the duplicate-OpenMP guards pinned in `app.py` (D66).
-  Verified serving (HTTP 200) on `127.0.0.1:7860`. Run: `uv run python -m qorgauvoice.demo.app`.
+  Verified serving (HTTP 200) on `127.0.0.1:7860`. Run: `uv run python -m saq.demo.app`.
   Note: **Gradio 6** (D31 said 4.x; forced up by `huggingface_hub` removing `HfFolder`).
   Demo uses a **0.5 threshold** (the FPR-calibrated one is degenerate on perfectly-separable data).
 - **Backend API** — FastAPI (`api/server.py`, `api/schemas.py`) over the same `Detector`:
@@ -91,7 +91,7 @@ landed. Full unit suite green (38 tests).
   single MPS device); model loaded once at startup. Verified end-to-end (TestClient). This is the
   distribution boundary for a **separate web frontend** (teammate's repo) — the OpenAPI contract
   at `/docs` is the interface. Bilingual labels/reasons moved to shared `explain/reasons.py`.
-  Run: `uv run uvicorn qorgauvoice.api.server:app` → http://127.0.0.1:8000/docs
+  Run: `uv run uvicorn saq.api.server:app` → http://127.0.0.1:8000/docs
 - **Channel + engine robustness fix (D70, D71)** — root cause of the real-world failure was a
   *channel shortcut* ("clean digital = synthetic, room/mic-recorded = human"), confirmed
   empirically. Fix = (D70) **room "played-back / re-recorded" augmentation** (`data/augment/room.py`:
@@ -115,9 +115,9 @@ modest test data (132 `test_same`, 45 `test_unseen`); (4) threshold still degene
 a 0.5 fallback. **The trained model artifact changed — re-commit `artifacts/models/` to share it.**
 
 ### Run commands
-- Build data: `uv run python -m qorgauvoice.data.build_dataset --per-language N`
-- Extract features (torch): `uv run python -m qorgauvoice.build_features`
-- Train + EER (no torch): `OMP_NUM_THREADS=1 uv run python -m qorgauvoice.train`
+- Build data: `uv run python -m saq.data.build_dataset --per-language N`
+- Extract features (torch): `uv run python -m saq.build_features`
+- Train + EER (no torch): `OMP_NUM_THREADS=1 uv run python -m saq.train`
 - Tests: `uv run pytest tests/unit -q`
 - Env: set `HF_HUB_DISABLE_XET=1` (faster/stable HF downloads) and `PYTORCH_ENABLE_MPS_FALLBACK=1`.
 
@@ -191,7 +191,7 @@ capture, messenger integration, on-device deployment, and the scam-intent LLM ar
 ---
 
 ## 4. Product Naming
-- **Product / pitch name:** `QorgauVoice` ("qorgau" = protection/defense).
+- **Product / pitch name:** `saq` ("qorgau" = protection/defense).
 - **Repo dir:** `shaq` (existing). Do not rename.
 - Verdict labels in code: `bona_fide` / `spoof`. UI labels localized (kk/ru/en).
 
@@ -322,7 +322,7 @@ shaq/
   CLAUDE.md                 # this file
   README.md                 # quickstart + metrics table + limitations
   pyproject.toml            # deps, tool config
-  src/qorgauvoice/
+  src/saq/
     config/                 # immutable config dataclasses + defaults (no hardcoded values)
     data/
       sources/              # fleurs.py, common_voice.py  (bona fide loaders)
@@ -444,7 +444,7 @@ demo          (Gradio app)                             ── depends on: ALL (c
 ## 16.2 Core contracts (`typing.Protocol`, not base classes)
 
 Structural typing so concrete classes need no inheritance and tests pass plain fakes. Live in
-one shared `src/qorgauvoice/contracts.py` (~120 lines) for a 12h build.
+one shared `src/saq/contracts.py` (~120 lines) for a 12h build.
 
 - **D40 — `EmbeddingExtractor` contract.** Decouples the three classifiers from the backbone;
   cache and demo depend only on this:

@@ -143,10 +143,10 @@ export function Demo() {
                 <p className={styles.phText}>The verdict appears here.</p>
                 <pre className={styles.startCode}>
                   {`# start the detector, then upload
-uv run uvicorn qorgauvoice.api.server:app
+uv run uvicorn saq.api.server:app
 # or instant mock verdicts:
 QV_MOCK=1 uv run uvicorn \\
-  qorgauvoice.api.server:app`}
+  saq.api.server:app`}
                 </pre>
               </div>
             )}
