@@ -1,0 +1,26 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Local tooling / OS
+.claude/
+.DS_Store
+
+# Large data & regenerable artifacts — NOT pushed
+data/
+artifacts/*
+# ...but DO keep the trained model so the backend runs out-of-the-box:
+!artifacts/models/
+!artifacts/models/**
+
+# Frontend (if a web/ app is added in this repo)
+node_modules/
+web/dist/
+web/build/
+web/.next/
+.env
+.env.local
