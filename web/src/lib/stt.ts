@@ -14,9 +14,12 @@ export interface Segment {
   text: string;
 }
 
+/** saq supports exactly three languages. */
+export type Language = "kk" | "ru" | "en";
+
 export interface STTResult {
   transcript: string;
-  language: string; // "kk" | "ru" | "en" | "und"
+  language: Language;
   languageLabel: string;
   confidence: number; // 0..1, estimated
   segments: Segment[];
@@ -96,20 +99,19 @@ export function transcribe(
   }).then(({ text, chunks }) => interpret(text, chunks, durationSec));
 }
 
-const LANG_LABELS: Record<string, string> = {
+const LANG_LABELS: Record<Language, string> = {
   kk: "Kazakh",
   ru: "Russian",
   en: "English",
-  und: "Undetermined",
 };
 
-/** Guess language from the script. Whisper transcribes in the spoken language,
- * so the characters are a reliable, dependency-free signal. */
-function detectLanguage(text: string): string {
+/** Map the transcript to one of saq's three supported languages by script.
+ * Whisper transcribes in the spoken language, so the characters are a reliable,
+ * dependency-free signal; anything non-Cyrillic falls back to English. */
+function detectLanguage(text: string): Language {
   if (/[әғқңөұүһі]/i.test(text)) return "kk"; // Kazakh-specific Cyrillic letters
-  if (/[а-яё]/i.test(text)) return "ru";
-  if (/[a-z]/i.test(text)) return "en";
-  return "und";
+  if (/[а-яё]/i.test(text)) return "ru"; // other Cyrillic → Russian
+  return "en";
 }
 
 /** Estimate transcription confidence from coverage, speech rate, and repetition. */
@@ -146,7 +148,7 @@ function interpret(text: string, chunks: Segment[], durationSec: number): STTRes
   return {
     transcript,
     language,
-    languageLabel: LANG_LABELS[language] ?? language,
+    languageLabel: LANG_LABELS[language],
     confidence: estimateConfidence(transcript, chunks, durationSec),
     segments: chunks,
     words,

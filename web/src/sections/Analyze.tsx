@@ -3,13 +3,13 @@ import { Reveal } from "../components/Reveal";
 import { SectionHead } from "../components/SectionHead";
 import { useAnalysis } from "../hooks/useAnalysis";
 import { useRecorder } from "../hooks/useRecorder";
-import type { Assessment, Factor } from "../lib/analyze";
+import type { RiskFactor, RiskLevel } from "../lib/fraud";
 import styles from "./Analyze.module.css";
 
-const ASSESSMENT_LABEL: Record<Assessment, string> = {
-  human: "Likely human",
-  ai: "Likely AI-generated",
-  inconclusive: "Inconclusive",
+const RISK_LABEL: Record<RiskLevel, string> = {
+  low: "Low fraud risk",
+  medium: "Medium fraud risk",
+  high: "High fraud risk",
 };
 
 export function Analyze() {
@@ -39,9 +39,9 @@ export function Analyze() {
     <section className={styles.section} id="try">
       <div className="shell framed">
         <SectionHead
-          eyebrow="Analyze"
-          title="Hear what's real — and read what's said."
-          lead="Record or upload a clip. saq transcribes it in the browser, checks the voice for synthetic markers, and combines both into one explained verdict. No upload to a third party, no account."
+          eyebrow="Fraud check"
+          title="Is this call a scam?"
+          lead="Record or upload a clip. saq transcribes it in the browser, weighs the words and the voice for fraud signals, and returns a risk assessment that explains why — not just whether the voice is AI. No upload to a third party, no account."
         />
 
         <Reveal className={styles.panel}>
@@ -103,14 +103,14 @@ export function Analyze() {
             {state.phase === "idle" && <Idle />}
             {busy && <Processing step={state.step} progress={state.modelProgress} />}
             {state.phase === "error" && <ErrorState message={state.error} onRetry={reset} />}
-            {state.phase === "done" && state.combined && <Results state={state} />}
+            {state.phase === "done" && state.fraud && <Results state={state} />}
           </div>
         </Reveal>
 
         <p className={styles.caveat}>
-          Whisper transcription and the confidence scores are estimates — saq flags risk, it doesn't
-          deliver proof. Treat a verdict as a prompt to verify through another channel, not a final
-          ruling.
+          saq estimates fraud risk from acoustic and language cues — it flags risk, it doesn't prove
+          intent. Whisper transcription and the scores are estimates. Treat a verdict as a prompt to
+          verify through an official channel, never as a final ruling.
         </p>
       </div>
     </section>
@@ -120,11 +120,11 @@ export function Analyze() {
 function Idle() {
   return (
     <div className={styles.placeholder}>
-      <p className={styles.phText}>Your transcript, voice analysis, and a combined verdict appear here.</p>
+      <p className={styles.phText}>A fraud-risk assessment with the reasons behind it appears here.</p>
       <ul className={styles.phList}>
-        <li>Transcript with detected language</li>
-        <li>AI-voice probability from the detector</li>
-        <li>One explained final assessment</li>
+        <li>Fraud risk score</li>
+        <li>Key risk factors — why it was flagged</li>
+        <li>Transcript &amp; voice analysis as supporting signals</li>
       </ul>
     </div>
   );
@@ -158,32 +158,45 @@ function ErrorState({ message, onRetry }: { message: string | null; onRetry: () 
 }
 
 function Results({ state }: { state: ReturnType<typeof useAnalysis>["state"] }) {
-  const { combined, stt, detection } = state;
-  if (!combined) return null;
-  const a = combined.assessment;
-  const confPct = combined.confidence !== null ? Math.round(combined.confidence * 100) : null;
+  const { fraud, stt, detection } = state;
+  if (!fraud) return null;
 
   return (
     <div className={styles.report}>
-      {/* Final assessment — the headline */}
-      <div className={`${styles.assessment} ${styles[a]}`}>
+      {/* Fraud risk assessment — the headline */}
+      <div className={`${styles.assessment} ${styles[fraud.level]}`}>
         <div className={styles.assessHead}>
           <span className={styles.assessDot} aria-hidden="true" />
-          <span className={styles.assessLabel}>{ASSESSMENT_LABEL[a]}</span>
-          <span className={styles.assessConf}>{confPct !== null ? `${confPct}% confidence` : "low certainty"}</span>
+          <span className={styles.assessLabel}>{RISK_LABEL[fraud.level]}</span>
+          <span className={styles.assessScore}>{fraud.score}/100</span>
         </div>
-        <p className={styles.assessSummary}>{combined.summary}</p>
-        <ul className={styles.factors}>
-          {combined.factors.map((f) => (
-            <FactorRow key={f.label} factor={f} />
-          ))}
-        </ul>
+        <div className={styles.riskMeter} role="img" aria-label={`Fraud risk score ${fraud.score} of 100`}>
+          <div className={styles.riskFill} style={{ width: `${fraud.score}%` }} />
+        </div>
+        <p className={styles.assessSummary}>{fraud.summary}</p>
       </div>
 
-      {/* Transcript */}
+      {/* Key risk factors */}
       <div className={styles.card}>
         <div className={styles.cardHead}>
-          <h3 className={styles.cardTitle}>Transcript</h3>
+          <h3 className={styles.cardTitle}>Key risk factors</h3>
+          <span className={styles.cardMeta}>why this was flagged</span>
+        </div>
+        {fraud.factors.length ? (
+          <ul className={styles.factors}>
+            {fraud.factors.map((f, i) => (
+              <FactorRow key={`${f.label}-${i}`} factor={f} />
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.muted}>No notable risk factors detected.</p>
+        )}
+      </div>
+
+      {/* Transcript analysis */}
+      <div className={styles.card}>
+        <div className={styles.cardHead}>
+          <h3 className={styles.cardTitle}>Transcript analysis</h3>
           {stt.data && (
             <span className={styles.cardMeta}>
               {stt.data.languageLabel} · {Math.round(stt.data.confidence * 100)}% est.
@@ -201,23 +214,21 @@ function Results({ state }: { state: ReturnType<typeof useAnalysis>["state"] }) 
         )}
       </div>
 
-      {/* Voice analysis */}
+      {/* Voice analysis (supporting signal) */}
       <div className={styles.card}>
         <div className={styles.cardHead}>
           <h3 className={styles.cardTitle}>Voice analysis</h3>
-          {detection.data && (
-            <span className={styles.cardMeta}>threshold {detection.data.threshold.toFixed(2)}</span>
-          )}
+          <span className={styles.cardMeta}>supporting signal</span>
         </div>
         {detection.data ? (
           <>
             <div className={styles.meterRow}>
-              <span className={styles.meterLabel}>AI probability</span>
+              <span className={styles.meterLabel}>Synthetic-voice likelihood</span>
               <span className={styles.meterValue}>{Math.round(detection.data.spoof_probability * 100)}%</span>
             </div>
             <div className={styles.meter}>
               <div
-                className={`${styles.meterFill} ${detection.data.label === "spoof" ? styles.fillAi : styles.fillHuman}`}
+                className={`${styles.meterFill} ${detection.data.spoof_probability >= 0.5 ? styles.fillAi : styles.fillHuman}`}
                 style={{ width: `${Math.round(detection.data.spoof_probability * 100)}%` }}
               />
             </div>
@@ -237,9 +248,9 @@ function Results({ state }: { state: ReturnType<typeof useAnalysis>["state"] }) 
   );
 }
 
-function FactorRow({ factor }: { factor: Factor }) {
+function FactorRow({ factor }: { factor: RiskFactor }) {
   return (
-    <li className={`${styles.factor} ${styles[`lean_${factor.lean}`]} ${factor.weight === "primary" ? styles.primaryFactor : ""}`}>
+    <li className={`${styles.factor} ${styles[`sev_${factor.severity}`]}`}>
       <span className={styles.factorDot} aria-hidden="true" />
       <span className={styles.factorLabel}>{factor.label}</span>
       <span className={styles.factorDetail}>{factor.detail}</span>

@@ -215,8 +215,7 @@
   color: var(--ink-2);
   max-width: 38ch;
 }
-.retry,
-.report .retry {
+.retry {
   margin-top: var(--sp-1);
   background: var(--ink);
   color: var(--paper);
@@ -234,6 +233,7 @@
   gap: var(--sp-3);
 }
 
+/* fraud risk headline */
 .assessment {
   padding: var(--sp-3);
   border-radius: var(--radius);
@@ -241,14 +241,14 @@
   background: var(--paper-raise);
   border-left-width: 3px;
 }
-.assessment.ai {
+.assessment.high {
   border-left-color: var(--signal);
 }
-.assessment.human {
-  border-left-color: var(--safe);
-}
-.assessment.inconclusive {
+.assessment.medium {
   border-left-color: var(--heat-4);
+}
+.assessment.low {
+  border-left-color: var(--safe);
 }
 
 .assessHead {
@@ -262,30 +262,55 @@
   height: 11px;
   border-radius: 50%;
 }
-.ai .assessDot {
+.high .assessDot {
   background: var(--signal);
 }
-.human .assessDot {
-  background: var(--safe);
-}
-.inconclusive .assessDot {
+.medium .assessDot {
   background: var(--heat-4);
+}
+.low .assessDot {
+  background: var(--safe);
 }
 .assessLabel {
   font-family: var(--font-display);
   font-size: var(--fs-h3);
 }
-.ai .assessLabel {
+.high .assessLabel {
   color: var(--signal-ink);
 }
-.human .assessLabel {
+.medium .assessLabel {
+  color: #9a6b14;
+}
+.low .assessLabel {
   color: var(--safe-ink);
 }
-.assessConf {
+.assessScore {
   margin-left: auto;
   font-family: var(--font-mono);
   font-size: var(--fs-mono);
   color: var(--ink-3);
+}
+
+.riskMeter {
+  height: 8px;
+  border-radius: 8px;
+  background: var(--paper-sunk);
+  overflow: hidden;
+  margin-top: var(--sp-2);
+}
+.riskFill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.7s var(--ease);
+}
+.high .riskFill {
+  background: var(--signal);
+}
+.medium .riskFill {
+  background: var(--heat-4);
+}
+.low .riskFill {
+  background: var(--safe);
 }
 .assessSummary {
   margin-top: var(--sp-2);
@@ -295,48 +320,7 @@
   color: var(--ink);
 }
 
-.factors {
-  list-style: none;
-  margin: var(--sp-3) 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid var(--rule);
-}
-.factor {
-  display: grid;
-  grid-template-columns: auto auto 1fr;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 0;
-  border-bottom: 1px solid var(--rule);
-  font-size: var(--fs-sm);
-}
-.factorDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--ink-3);
-}
-.lean_ai .factorDot {
-  background: var(--signal);
-}
-.lean_human .factorDot {
-  background: var(--safe);
-}
-.factorLabel {
-  color: var(--ink);
-}
-.primaryFactor .factorLabel {
-  font-weight: 600;
-}
-.factorDetail {
-  text-align: right;
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  color: var(--ink-2);
-}
-
+/* cards */
 .card {
   padding: var(--sp-3);
   border: 1px solid var(--rule);
@@ -362,6 +346,62 @@
   font-size: var(--fs-mono);
   color: var(--ink-3);
 }
+
+/* risk factors */
+.factors {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.factor {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--fs-sm);
+}
+.factor:last-child {
+  border-bottom: none;
+}
+.factorDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+.sev_high .factorDot {
+  background: var(--signal);
+}
+.sev_medium .factorDot {
+  background: var(--heat-4);
+}
+.sev_low .factorDot {
+  background: var(--ink-2);
+}
+.sev_info .factorDot {
+  background: var(--rule-strong);
+}
+.factorLabel {
+  color: var(--ink);
+}
+.sev_high .factorLabel,
+.sev_medium .factorLabel {
+  font-weight: 600;
+}
+.sev_info .factorLabel {
+  color: var(--ink-2);
+}
+.factorDetail {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  color: var(--ink-2);
+}
+
 .transcript {
   font-family: var(--font-serif);
   font-size: var(--fs-lead);
